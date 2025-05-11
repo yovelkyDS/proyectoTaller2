@@ -1,7 +1,7 @@
 from GUI import VtnMain, VtnSecond
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 import re
-import sys
+import sys, random
 
 def setName(parent):
     while True:
@@ -23,13 +23,21 @@ def setNumber(parent):
         else:
             QMessageBox.warning(parent, "Número inválido", "Solo se permiten números enteros. Inténtalo de nuevo.")
 
-
 def openNewGame(vtnM):
     nume = setNumber(vtnM)
     if nume is None:
         return
     vtnM.vtnNewGame = VtnSecond("Nueva Partida", nume)
     vtnM.vtnNewGame.show()
+    QApplication.processEvents()
+
+    pX, pY = vtnM.vtnNewGame.ultimo_click
+    if pX is None or pY is None:
+        x = random.randint(0, nume-1)
+        y = random.randint(0, nume-1)
+        vtnM.vtnNewGame.matrizBotones[x][y].setText("🦠")
+        vtnM.vtnNewGame.ultimo_click = (x, y)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

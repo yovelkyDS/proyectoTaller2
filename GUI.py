@@ -7,6 +7,7 @@ class VtnSecond(QWidget):
         super().__init__()
         self.setWindowTitle(title)
         self.setGeometry(100, 100, 400, 300)
+        self.ultimo_click = (None, None)
 
         # Crear matriz de botones
         self.matrizBotones = []
@@ -16,7 +17,18 @@ class VtnSecond(QWidget):
             for x in range(n):
                 boton = QPushButton("🟩") 
                 boton.setFixedSize(50, 50) 
-                boton.setStyleSheet("font-size: 40px; border: none; background: transparent;")  
+                boton.setStyleSheet("""
+                                        QPushButton {
+                                            font-size: 30px;
+                                            background-color: black;
+                                            border: 1px solid #ccc;
+                                            border-radius: 5px;
+                                        }
+                                        QPushButton:hover {
+                                            background-color: #f0f0f0;
+                                        }
+                                    """)
+                boton.clicked.connect(lambda __, x=x, y=y: self.buttonClicked(x, y))
                 grid_layout.addWidget(boton, y, x) 
                 filaBtn.append(boton)
             self.matrizBotones.append(filaBtn)
@@ -37,7 +49,10 @@ class VtnSecond(QWidget):
         v_layout.addLayout(h_layout)
 
         self.setLayout(v_layout)
-    
+
+    def buttonClicked(self, x:int, y:int):
+        self.ultimo_click = (x, y)
+        print(f"Botón clickeado: ({x}, {y})")
 
 class VtnMain(QMainWindow):
     def __init__(self):
@@ -81,5 +96,3 @@ class VtnMain(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
-
-
