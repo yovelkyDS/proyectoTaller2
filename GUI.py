@@ -31,13 +31,13 @@ class VtnSecond(QWidget):
                 filaBtn.append(boton)
             self.matrizBotones.append(filaBtn)
 
-        btnSalir = QPushButton("Salir")
-        btnSalir.setFixedSize(80, 30)
-        btnSalir.clicked.connect(self.close)
+        self.btnSalir = QPushButton("Salir")
+        self.btnSalir.setFixedSize(80, 30)
+        self.btnSalir.clicked.connect(self.close)
 
         h_layout = QHBoxLayout()
         h_layout.addStretch()
-        h_layout.addWidget(btnSalir)
+        h_layout.addWidget(self.btnSalir)
 
         v_layout = QVBoxLayout()
         v_layout.addLayout(grid_layout)

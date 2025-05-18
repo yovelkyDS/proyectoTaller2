@@ -1,7 +1,5 @@
 import random
 import struct
-import os
-
 # Constantes
 LIBRE = 0
 VIRUS = 1
@@ -71,3 +69,45 @@ def virusSpread(matriz):
         matriz[x][y] = VIRUS
         return x, y
     return None
+
+def matriz_a_hex(matriz):
+    hex_filas = []
+    for fila in matriz:
+        num = 0
+        for v in fila:
+            num = num*3 + v
+        # Guardar cada fila como bytes binarios, no como string hexadecimal
+        hex_filas.append(num.to_bytes((len(fila)*2+7)//8, 'big'))
+    return hex_filas
+
+def savePartida(nombre, matriz, nivel):
+    n = len(matriz)
+    hex_filas = matriz_a_hex(matriz)
+    with open(nombre, 'wb') as f:
+        f.write(struct.pack('>H', n))
+        f.write(struct.pack('B', nivel))
+        for h in hex_filas:
+            f.write(h)
+
+def hex_a_matriz(hex_filas, n):
+    matriz = []
+    for h in hex_filas:
+        num = int.from_bytes(h, 'big')
+        fila = []
+        for _ in range(n):
+            fila.append(num % 3)
+            num //= 3
+        matriz.append(list(reversed(fila)))
+    return matriz
+
+def loadGame(nombre):
+    with open(nombre, 'rb') as f:
+        n = struct.unpack('>H', f.read(2))[0]
+        nivel = struct.unpack('B', f.read(1))[0]
+        fila_bytes = (n*2+7)//8
+        hex_filas = []
+        for _ in range(n):
+            datos = f.read(fila_bytes)
+            hex_filas.append(datos)
+        matriz = hex_a_matriz(hex_filas, n)
+    return matriz, nivel
