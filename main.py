@@ -2,10 +2,11 @@ from GUI import VtnMain, VtnSecond
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
 from game import virusSpread, putWall, inicialize, posVirus, canVirusSpread, savePartida, loadGame
 import sys
+import os
 
 MATRIZ = []
 
-def handle_click(vtn, num, y_click, x_click, nivel):
+def handle_click(vtn, y_click, x_click, nivel):
     global MATRIZ
     if not canVirusSpread(MATRIZ):
         reply = QMessageBox.question(
@@ -17,7 +18,6 @@ def handle_click(vtn, num, y_click, x_click, nivel):
         if reply == QMessageBox.StandardButton.Yes:
             openNewGame(vtn, nivel+1)
         else:
-
             vtn.vtnNewGame.close()
         return
     if putWall(MATRIZ, y_click, x_click):
@@ -39,6 +39,7 @@ def handle_click(vtn, num, y_click, x_click, nivel):
             if reply == QMessageBox.StandardButton.Yes:
                 openNewGame(vtn, nivel+1)  # Llama a la función para iniciar un nuevo juego/nivel
             if reply == QMessageBox.StandardButton.No:
+                print("Guardando partida...")
                 reply_save = QMessageBox.question(
                     vtn.vtnNewGame,
                     "Guardar Partida",
@@ -91,11 +92,21 @@ def openNewGame(vtnM, level):
     for i in range(nume):
         for j in range(nume):
             btn = vtnM.vtnNewGame.matrizBotones[i][j]
-            btn.clicked.connect(lambda _, y=i, x=j: handle_click(vtnM, nume, y, x, level))
+            btn.clicked.connect(lambda _, y=i, x=j: handle_click(vtnM, y, x, level))
     vtnM.vtnNewGame.btnSalir.clicked.connect(lambda : saveGame(vtnM, level))
 
 def continueGame(vtnM):
-    file_name, ok = QInputDialog.getText(vtnM.vtnNewGame, "Cargar Partida", "Nombre del archivo:")
+    global MATRIZ
+    folder = "partidas"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    archivos = [f for f in os.listdir(folder) if f.endswith(".bin")]
+    if not archivos:
+        QMessageBox.warning(vtnM, "Sin partidas", "No hay archivos de partida guardados.")
+        return
+    archivos_str = "\n".join(archivos)
+    QMessageBox.information(vtnM, "Partidas guardadas", f"Archivos disponibles:\n{archivos_str}")
+    file_name, ok = QInputDialog.getText(vtnM, "Cargar Partida", "Nombre del archivo:")
     if ok and file_name.strip():
         try:
             MATRIZ, level = loadGame(file_name.strip())
@@ -110,14 +121,16 @@ def continueGame(vtnM):
                         btn.setText("🦠")
                     elif MATRIZ[i][j] == 2:  # Suponiendo 2 es barrera
                         btn.setText("🧱")
+                    elif MATRIZ[i][j] == 0:  # Suponiendo 0 es libre
+                        btn.setText("🟩")
                     else:
                         btn.setText("")
-                        btn.clicked.connect(lambda _, y=i, x=j: handle_click(vtnM, len(MATRIZ), y, x, level))
+                    btn.clicked.connect(lambda _, y=i, x=j: handle_click(vtnM, y, x, level))
             vtnM.vtnNewGame.btnSalir.clicked.connect(lambda : saveGame(vtnM, level))
         except Exception as e:
-            QMessageBox.warning(vtnM.vtnNewGame, "Error", f"No se pudo cargar la partida: {e}")
+            QMessageBox.warning(vtnM, "Error", f"No se pudo cargar la partida: {e}")
     else:
-        QMessageBox.warning(vtnM.vtnNewGame, "Error", "Nombre de archivo inválido.")
+        QMessageBox.warning(vtnM, "Error", "Nombre de archivo inválido.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

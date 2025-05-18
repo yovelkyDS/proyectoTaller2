@@ -1,5 +1,5 @@
 import random
-import struct
+import struct, os
 # Constantes
 LIBRE = 0
 VIRUS = 1
@@ -83,13 +83,19 @@ def matriz_a_hex(matriz):
 def savePartida(nombre, matriz, nivel):
     n = len(matriz)
     hex_filas = matriz_a_hex(matriz)
-    with open(nombre, 'wb') as f:
+    carpeta = "partidas"
+    os.makedirs(carpeta, exist_ok=True)
+    if not nombre.endswith('.bin'):
+        nombre += '.bin'
+    ruta = os.path.join(carpeta, nombre)
+    with open(ruta, 'wb') as f:
         f.write(struct.pack('>H', n))
         f.write(struct.pack('B', nivel))
         for h in hex_filas:
             f.write(h)
 
 def hex_a_matriz(hex_filas, n):
+    print("Convirtiendo hex a matriz")
     matriz = []
     for h in hex_filas:
         num = int.from_bytes(h, 'big')
@@ -101,7 +107,15 @@ def hex_a_matriz(hex_filas, n):
     return matriz
 
 def loadGame(nombre):
-    with open(nombre, 'rb') as f:
+    print("Cargando partida")
+    if not nombre.endswith('.bin'):
+        nombre += '.bin'
+    carpeta = "partidas"
+    ruta = os.path.join(carpeta, nombre)
+    if not os.path.exists(ruta):
+        raise FileNotFoundError(f"El archivo {ruta} no existe.")
+    with open(ruta, 'rb') as f:
+        print(f"Abriendo {ruta}")
         n = struct.unpack('>H', f.read(2))[0]
         nivel = struct.unpack('B', f.read(1))[0]
         fila_bytes = (n*2+7)//8
