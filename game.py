@@ -35,6 +35,15 @@ def es_isla(matriz, x, y):
                     cola.append((nx, ny))
     return True
 
+def canVirusSpread(matriz):
+    n = len(matriz)
+    for x, y in posVirus(matriz):
+        for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+            nx, ny = x+dx, y+dy
+            if 0 <= nx < n and 0 <= ny < n and matriz[nx][ny] == 0:
+                return True
+    return False
+
 def putWall(matriz, x, y):
     if matriz[x][y] != LIBRE:
         return False
@@ -61,3 +70,4 @@ def virusSpread(matriz):
         x, y = random.choice(infectados)
         matriz[x][y] = VIRUS
         return x, y
+    return None

@@ -1,12 +1,24 @@
 from GUI import VtnMain, VtnSecond
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
-from game import virusSpread, putWall, inicialize
+from game import virusSpread, putWall, inicialize, posVirus, canVirusSpread
 import sys
 TURNO = 0
 MATRIZ = []
 
 def handle_click(vtn, num, y_click, x_click, nivel):
     global MATRIZ
+    if not canVirusSpread(MATRIZ):
+        reply = QMessageBox.question(
+            vtn.vtnNewGame,
+            "¡Ganaste!",
+            "¡Felicidades, has ganado! ¿Quieres continuar al siguiente nivel?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            openNewGame(vtn, nivel+1, num)
+        else:
+            vtn.vtnNewGame.close()
+        return
     if putWall(MATRIZ, y_click, x_click):
         vtn.vtnNewGame.matrizBotones[y_click][x_click].setText("🧱")
         result = virusSpread(MATRIZ)
@@ -50,8 +62,10 @@ def openNewGame(vtnM, level, nume=6):
     MATRIZ = inicialize(nume, level)
     vtnM.vtnNewGame.setWindowTitle(f"Nivel {level}")
     vtnM.vtnNewGame.show()
-    pX, pY = virusSpread(MATRIZ)
-    vtnM.vtnNewGame.matrizBotones[pX][pY].setText("🦠")
+
+    for i, j in posVirus(MATRIZ):
+        vtnM.vtnNewGame.matrizBotones[i][j].setText("🦠")
+        
     for i in range(nume):
         for j in range(nume):
             btn = vtnM.vtnNewGame.matrizBotones[i][j]
