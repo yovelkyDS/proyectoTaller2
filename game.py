@@ -24,25 +24,24 @@ def inicialize(n, nivel):
         matriz[x][y] = VIRUS
     return matriz
 
-def bfs(t, visit, i, j, largo):
-    cola = [(i, j)]
-    visit[i][j] = True
-    toca_borde = False
-    puede_virus = False
-    while cola:
-        cx, cy = cola.pop(0)
-        if cx == 0 or cx == largo-1 or cy == 0 or cy == largo-1:
-            toca_borde = True
-        for dx, dy in DIRECCIONES:
-            nx, ny = cx+dx, cy+dy
-            if 0 <= nx < largo and 0 <= ny < largo:
-                if t[nx][ny] == VIRUS:
-                    puede_virus = True
-                if not visit[nx][ny] and t[nx][ny] == LIBRE:
-                    visit[nx][ny] = True
-                    cola.append((nx, ny))
-    # Es isla si NO toca borde y NO puede ser alcanzada por el virus
-    return not toca_borde and not puede_virus
+def checkEndGame(matriz):
+    """
+    Verifica si el juego terminó porque el virus ya no puede propagarse.
+    Retorna False si el usuario perdió (el virus no puede expandirse y no quedan casillas libres).
+    Retorna True si el juego puede continuar.
+
+    Args:
+        matriz (_type_): matriz del juego
+
+    Returns:
+        bool: False si el usuario perdió, True si el juego sigue
+    """
+    # Si no hay casillas libres y el virus no puede expandirse, el usuario perdió
+    libres = any(LIBRE in fila for fila in matriz)
+    if not libres and not canVirusSpread(matriz):
+        return False
+    return True
+    
 
 def es_isla(matriz, x, y):
     """Verifica si poner una barrera en cierta posicion crearia una isla 
@@ -59,13 +58,39 @@ def es_isla(matriz, x, y):
     temp = [fila[:] for fila in matriz]
     temp[x][y] = BARRERA
 
-    visitado = [[False]*n for _ in range(n)]
+    # Buscar todas las posiciones LIBRE
+    libres = set((i, j) for i in range(n) for j in range(n) if temp[i][j] == LIBRE)
+    if not libres:
+        return False
 
-    for i in range(n):
-        for j in range(n):
-            if not visitado[i][j] and temp[i][j] == LIBRE:
-                if bfs(temp, visitado, i, j, n):
-                    return True 
+    # Buscar todas las posiciones VIRUS
+    virus = set((i, j) for i in range(n) for j in range(n) if temp[i][j] == VIRUS)
+    if not virus:
+        return False  # No hay virus, no puede haber isla
+
+    # BFS desde todas las posiciones de virus para marcar las LIBRE alcanzables
+    visitado = [[False]*n for _ in range(n)]
+    from collections import deque
+    cola = deque()
+    for vx, vy in virus:
+        cola.append((vx, vy))
+        visitado[vx][vy] = True
+
+    while cola:
+        cx, cy = cola.popleft()
+        for dx, dy in DIRECCIONES:
+            nx, ny = cx+dx, cy+dy
+            if 0 <= nx < n and 0 <= ny < n and not visitado[nx][ny]:
+                if temp[nx][ny] == LIBRE:
+                    visitado[nx][ny] = True
+                    cola.append((nx, ny))
+                elif temp[nx][ny] == VIRUS:
+                    visitado[nx][ny] = True  # Marcar virus también
+
+    # Si existe alguna celda LIBRE no visitada, es una isla
+    for i, j in libres:
+        if not visitado[i][j]:
+            return True
     return False
 
 def canVirusSpread(matriz):

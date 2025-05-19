@@ -1,6 +1,6 @@
 from GUI import VtnMain, VtnSecond
 from PyQt6.QtWidgets import QApplication, QInputDialog, QMessageBox
-from game import virusSpread, putWall, inicialize, posVirus, canVirusSpread, savePartida, loadGame
+from game import virusSpread, putWall, inicialize, posVirus, canVirusSpread, savePartida, loadGame, checkEndGame
 import sys
 import os
 
@@ -28,6 +28,7 @@ def handle_click(vtn, y_click, x_click, nivel):
         else:
             vtn.vtnNewGame.close()
         return
+    
     if putWall(MATRIZ, y_click, x_click):
         vtn.vtnNewGame.matrizBotones[y_click][x_click].setText("🧱")
         result = virusSpread(MATRIZ)
@@ -37,6 +38,15 @@ def handle_click(vtn, y_click, x_click, nivel):
                 vtn.vtnNewGame.matrizBotones[pX][pY].setText("🦠")
             else:
                 QMessageBox.warning(vtn.vtnNewGame, "Error", "El virus se propagó fuera de los límites de la matriz.")
+            if not checkEndGame(MATRIZ):
+                QMessageBox.information(vtn.vtnNewGame, "¡Perdiste!", "El virus ha infectado todas las celdas libres. ¡Has perdido!")
+                reply = QMessageBox.question(
+                    vtn.vtnNewGame,
+                    "¡Perdiste!",
+                    "¿Quieres reiniciar el juego?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                if reply == QMessageBox.StandardButton.Yes:
+                    openNewGame(vtn, nivel)
         else:
             reply = QMessageBox.question(
                 vtn.vtnNewGame,
