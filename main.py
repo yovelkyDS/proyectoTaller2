@@ -7,6 +7,14 @@ import os
 MATRIZ = []
 
 def handle_click(vtn, y_click, x_click, nivel):
+    """Maneja lo que sucede cuando se da click en un boton de la matriz 
+
+    Args:
+        vtn (_type_): ventana principal
+        y_click (_type_): coordenada y del boton
+        x_click (_type_): coordenada x del boton
+        nivel (_type_): nivel de la partida
+    """
     global MATRIZ
     if not canVirusSpread(MATRIZ):
         reply = QMessageBox.question(
@@ -53,6 +61,14 @@ def handle_click(vtn, y_click, x_click, nivel):
         QMessageBox.warning(vtn.vtnNewGame, "Movimiento incorrecto", "La celda ya está ocupada o no se puede colocar una barrera ahí.")
 
 def setNumber(parent):
+    """Solicita al usuario el tamaño de la matriz
+
+    Args:
+        parent (_type_): ventana principal 
+
+    Returns:
+        _type_: devuelve el numero ingresado por el usuario para crear la matriz
+    """
     while True:
         num, ok = QInputDialog.getText(parent, "Matriz", "Escriba el número de filas y columnas (NxN):")
         if not ok:
@@ -63,6 +79,12 @@ def setNumber(parent):
             QMessageBox.warning(parent, "Número inválido", "Solo se permiten números enteros.")
 
 def saveGame(vtnM, level):
+    """Guarda la partida que se esta jugando en un archivo .bin
+
+    Args:
+        vtnM (_type_): ventana principal 
+        level (_type_): nivel de la partida
+    """
     global MATRIZ
     if MATRIZ:
         file_name, ok = QInputDialog.getText(vtnM.vtnNewGame, "Guardar Partida", "Nombre del archivo:")
@@ -77,6 +99,12 @@ def saveGame(vtnM, level):
     vtnM.vtnNewGame.close()
 
 def openNewGame(vtnM, level):
+    """Inicia una nueva partida 
+
+    Args:
+        vtnM (_type_): ventana principal
+        level (_type_): nivel de la partida
+    """
     global MATRIZ
     nume = setNumber(vtnM)
     if nume is None:
@@ -96,6 +124,11 @@ def openNewGame(vtnM, level):
     vtnM.vtnNewGame.btnSalir.clicked.connect(lambda : saveGame(vtnM, level))
 
 def continueGame(vtnM):
+    """Carga una partida guardada para continuar jugando 
+
+    Args:
+        vtnM (_type_): ventana principal 
+    """
     global MATRIZ
     folder = "partidas"
     if not os.path.exists(folder):

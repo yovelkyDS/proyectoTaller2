@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 
 class VtnSecond(QWidget):
     def __init__(self, title, n: int = 5):
+        """"Clase de la ventana secundaria del juego, definicion de matriz, botones y estilo"""
         super().__init__()
         self.setWindowTitle(title)
         self.setGeometry(100, 100, 400, 300)
@@ -47,8 +48,8 @@ class VtnSecond(QWidget):
 
 class VtnMain(QMainWindow):
     def __init__(self):
+        """"Clase de la ventana principal del juego, definicion de botones y estilo"""
         super().__init__()
-
         self.setWindowTitle("Virus Game")
         self.setGeometry(40, 50, 800, 600)
 
